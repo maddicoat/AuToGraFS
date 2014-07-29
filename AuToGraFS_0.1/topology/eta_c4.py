@@ -1,0 +1,277 @@
+#!/usr/bin/python
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.io import read, write
+from ase.lattice.spacegroup import crystal
+from ase.calculators.neighborlist import *
+from ase.data import *
+from math import pi
+import numpy as np
+
+def make_eta_c4(names,sizes):
+
+    #work out the expansion factor
+    #dist0 = furthest_dummy(mol0)
+    #dist1 = furthest_dummy(mol1)
+
+    factor = sum(sizes) #dist0 + dist1
+
+    factor = factor * 2
+    #factor = 3.0
+    
+    print "factor = " , factor
+    a = 3.1018 * factor 
+    b = 0.4373 * factor 
+    #b = 0.5466 * factor #RCSR value, incorrect? 
+   
+    # C -> triangles, N => midpoints
+    #eta_c4 = crystal(['C', 'N' , 'N'], [(0.4069, 0.8138, 0.0), (0.5, 0.0, 0.0), (0.2965, 0.7035, 0.6667)], spacegroup=180, #P6(2)22 #RCSR incorrect?
+    eta_c4 = crystal(['C', 'N' , 'F'], [(0.4069, 0.8138, 0.0), (0.5, 0.0, 0.0), (0.7035, 0.4070, 0.5)], spacegroup=180, #P6(2)22
+                   cellpar=[a, a, b, 90, 90, 120])
+    
+    
+    #write('test.xyz',eta_c4)
+    write('test.cif',eta_c4)
+    
+    eps = 0.9
+    model_molecule={}
+    n_obj = -1 #initialise to -1 such that it can be indexed at start of add
+    n_tags = 0
+    
+    #First detect global bonding
+    cov_rad=[]
+    for atom in eta_c4:
+        #cov_rad.append(covalent_radii[atom.number])
+        cov_rad.append(factor / 4)
+    
+    print cov_rad
+    
+    nlist = NeighborList(cov_rad,skin=3.0,self_interaction=False,bothways=True)
+    nlist.build(eta_c4)
+    
+    #To sort out tags, we need to label each bond
+    nbond = 1
+    bond_matrix = np.zeros( (len(eta_c4),len(eta_c4)) )
+    pbc_bond_matrix = np.zeros( (len(eta_c4),len(eta_c4)) )
+    
+    bond_dict = {}
+    
+    #Something funky, missing bonds,
+    #for atom in eta_c4:
+    #    print "---------------------Atom",atom.index,"--------------------"
+    #    for ind in range(len(eta_c4)):
+    #        print atom.index, ind, eta_c4.get_distance(atom.index,ind,mic=True), eta_c4.get_distance(atom.index,ind)
+
+    for atom in eta_c4:
+        print "---------------------"
+        indices, offsets = nlist.get_neighbors(atom.index)
+        for index,offset in zip(indices,offsets):
+            print atom.index, index, atom.symbol, eta_c4[index].symbol, offset, eta_c4.get_distance(atom.index,index,mic=True)
+            if atom.index <= index:# and eta_c4[index].symbol != 'F': #F require special treatment
+                this_bond = [atom.index, index]
+                for o in offset:
+                    this_bond.append(o)
+                bond = tuple(this_bond)
+                print bond
+                bond_dict[bond] = nbond
+                #Now we need to find the same bond the other direction to get the offsets right
+                indices2,offsets2 = nlist.get_neighbors(index)
+                for i2,o2 in zip(indices2,offsets2):
+                    if i2 == atom.index:
+                        #print "sum of offsets = ", offset, o2, sum(offset + o2)
+                        if sum(offset + o2) == 0: #same bond
+                            this_bond = [index, atom.index]
+                            for o in o2:
+                                this_bond.append(o)
+                            bond = tuple(this_bond)
+                            print bond
+                            bond_dict[bond] = nbond
+                nbond +=1
+    
+    print "Bond dict:"
+    print nbond
+    for k,v in bond_dict.items():
+        print k,v
+    print "End Bond dict:"
+    #Now we want to delete C-F bonds that are not of length factor/2
+    for k,v in bond_dict.items():
+        i1,i2,o1,o2,o3 = k
+        position1 = eta_c4.positions[i1]
+        position2 = eta_c4.positions[i2]
+        position2_mic = eta_c4.positions[i2] + np.dot([o1,o2,o3], eta_c4.get_cell())
+        this_dist = np.linalg.norm(position1 - position2)
+        this_dist_mic = np.linalg.norm(position1 - position2_mic)
+        print i1,i2, this_dist, this_dist_mic, (this_dist - factor/2), this_dist_mic - factor/2
+        if abs(this_dist - factor/2) > eps and all(o == 0 for o in [o1,o2,o3]):
+            print "deleting", k
+            del bond_dict[k]
+        elif abs(this_dist_mic - factor/2) > eps and any(o != 0 for o in [o1,o2,o3]) :
+            print "deleting", k
+            del bond_dict[k]
+
+
+
+    #print "New Bond dict:"
+    #print len(bond_dict)
+    #for k,v in sorted(bond_dict.items()):
+    #    i1,i2,o1,o2,o3 = k
+    #    position1 = eta_c4.positions[i1]
+    #    position2 = eta_c4.positions[i2]
+    #    position2_mic = eta_c4.positions[i2] + np.dot([o1,o2,o3], eta_c4.get_cell())
+    #    this_dist = np.linalg.norm(position1 - position2)
+    #    this_dist_mic = np.linalg.norm(position1 - position2_mic)
+    #    print k,v, this_dist,this_dist_mic
+    #print "End New Bond dict:"
+    
+    #Start with C (triangles) 
+    for atom in eta_c4:
+        if atom.symbol == 'C':
+            print'======================================='
+            print 'C Atom ',atom.index
+            n_obj+=1
+            model_molecule[n_obj] = Atoms()
+            model_molecule[n_obj] += atom
+            model_molecule[n_obj][0].original_index = atom.index
+            model_molecule[n_obj][0].symbol = 'F' 
+            indices, offsets = nlist.get_neighbors(atom.index)
+            #Just checking the symbols here
+            print indices
+            print offsets
+            symbols = ([eta_c4[index].symbol for index in indices])
+            symbol_string = ''.join(sorted([eta_c4[index].symbol for index in indices]))
+            #print symbol_string
+            #for i,o in zip(indices, offsets):
+            #    print i,o
+            for index,offset in zip(indices,offsets):
+                print atom.index, index, offset
+                this_bond = [atom.index, index]
+                for o in offset:
+                    this_bond.append(o)
+                bond = tuple(this_bond)
+                #print bond_dict[bond]
+                print abs(eta_c4.get_distance(atom.index,index,mic=True)), abs(eta_c4.get_distance(atom.index,index,mic=True) - factor)
+                #if eta_c4[index].symbol == 'N' and abs(eta_c4.get_distance(atom.index,index,mic=True) - factor) < eps: #necessary check, because some atoms are closer than unit distance:
+                if bond in bond_dict:
+                    if any(o != 0 for o in offset):
+                        #If we're going over a periodic boundary, we need to negate the tag
+                        model_molecule[n_obj] += eta_c4[index]
+                        model_molecule[n_obj].positions[-1] = eta_c4.positions[index] + np.dot(offset, eta_c4.get_cell())
+                        model_molecule[n_obj][-1].tag = -bond_dict[bond]
+                    else:
+                        model_molecule[n_obj] += eta_c4[index]
+                        model_molecule[n_obj][-1].tag = bond_dict[bond] 
+                        model_molecule[n_obj].positions[-1] = eta_c4.positions[index] + np.dot(offset, eta_c4.get_cell())
+    
+    n_centers = n_obj
+    #
+    #
+    ##Now we do the  N  (edges)
+    for atom in eta_c4:
+        if atom.symbol == 'N' or atom.symbol =='F':
+            #print'======================================='
+            #print 'N Atom ',atom.index, " finding edges"
+            n_obj+=1
+            model_molecule[n_obj] = Atoms()
+            model_molecule[n_obj] += atom
+            indices, offsets = nlist.get_neighbors(atom.index)
+            for index,offset in zip(indices,offsets):
+                print index, offset, eta_c4[index].symbol
+                this_bond = [atom.index, index]
+                for o in offset:
+                    this_bond.append(o)
+                bond = tuple(this_bond)
+                #if not bond_dict.has_key(bond):
+                    #Then 
+                #if eta_c4[index].symbol == 'C' and abs(eta_c4.get_distance(atom.index,index,mic=True) - factor) < eps: #necessary check, because some atoms are closer than unit distance:
+                if bond in bond_dict:
+                    if any(o != 0 for o in offset):
+                        #If we're going over a periodic boundary, we need to negate the tag
+                        model_molecule[n_obj] += eta_c4[index]
+                        model_molecule[n_obj].positions[-1] = eta_c4.positions[index] + np.dot(offset, eta_c4.get_cell())
+                        model_molecule[n_obj][-1].tag = -bond_dict[bond]
+                    else:
+                        model_molecule[n_obj] += eta_c4[index]
+                        model_molecule[n_obj][-1].tag = bond_dict[bond] 
+                        model_molecule[n_obj].positions[-1] = eta_c4.positions[index] + np.dot(offset, eta_c4.get_cell())
+    
+    
+    #
+    #
+    #
+    f = open('eta_c4.model','w')
+    g = open('control-mofgen.txt','w')
+    #Just for checking, now lets gather everything in the model_molecule dict into one big thing and print it
+    #test_mol = Atoms()
+    #for obj in model_molecule:
+    #    test_mol += model_molecule[obj]
+    
+    #write('test_model.xyz',test_mol)
+    
+    #print n_centers, n_model, n_obj
+    #Headers and cell
+    f.write('%-20s %-3d\n' %('Number of objects =',n_obj+1))
+    f.write('%-20s\n' %('build = systre'))
+    f.write('%5s\n' %('Cell:'))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (eta_c4.get_cell()[0][0],
+               eta_c4.get_cell()[0][1],
+               eta_c4.get_cell()[0][2]))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (eta_c4.get_cell()[1][0],
+               eta_c4.get_cell()[1][1],
+               eta_c4.get_cell()[1][2]))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (eta_c4.get_cell()[2][0],
+               eta_c4.get_cell()[2][1],
+               eta_c4.get_cell()[2][2])) 
+    
+    g.write('%-20s\n' %('model = eta_c4'))
+
+    #Now write stuff          
+    for obj in xrange(n_centers+1):
+        f.write('\n%-8s %-3d\n' %('Center: ', obj+1))
+        f.write('%-3d\n' %(len(model_molecule[obj])))
+        f.write('%-20s\n' %('type = triangle'))
+        #process positions to make it a bit more ideal
+        for atom in model_molecule[obj]:
+            #if atom.symbol == 'C':
+            if atom.index != 0:
+                model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+        for atom in model_molecule[obj]:
+            (x,y,z) = atom.position
+            #print atom.symbol, atom.position, atom.tag
+            if atom.tag:
+                f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % ('X', x, y, z, atom.tag))
+                #f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % (atom.symbol, x, y, z, atom.tag))
+            else:
+                f.write('%-2s %15.8f %15.8f %15.8f\n' % ('Q', x, y, z))
+                #f.write('%-2s %15.8f %15.8f %15.8f\n' % (atom.symbol, x, y, z))
+        g.write('%-9s %-50s\n' %('center =', names[0]))
+    
+    for obj in xrange(n_centers+1,n_obj+1):
+        f.write('\n%-8s %-3d\n' %('Linker: ', obj-n_centers))
+        f.write('%-3d\n' %(len(model_molecule[obj])))
+        f.write('%-20s\n' %('type = linear'))
+        #process positions to make it a bit more ideal
+        for atom in model_molecule[obj]:
+            #if atom.symbol == 'C': 
+            if atom.index != 0:
+                model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+        for atom in model_molecule[obj]:
+            (x,y,z) = atom.position
+            #print atom.symbol, atom.position, atom.tag
+            if atom.tag:
+                f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % ('X', x, y, z, atom.tag))
+                #f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % (atom.symbol, x, y, z, atom.tag))
+            else:
+                f.write('%-2s %15.8f %15.8f %15.8f\n' % ('Q', x, y, z))
+                #f.write('%-2s %15.8f %15.8f %15.8f\n' % (atom.symbol, x, y, z))
+        g.write('%-9s %-50s\n' %('linker =', names[1]))
+    
+    #
+    #
+    #test_mol = Atoms()
+    #for obj in model_molecule:
+    #    test_mol += model_molecule[obj]
+    #
+    #write('test_model2.xyz',test_mol)

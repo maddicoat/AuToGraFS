@@ -1,0 +1,88 @@
+    while internal_bonds:
+        print "Here"
+    #dummy_indices= bigmol[[atom.index for atom in bigmol if atom.symbol=='X']]
+        dummy_indices= [atom.index for atom in bigmol if atom.symbol=='X']
+        print dummy_indices
+        #dummy_distances=np.zeros((len(dummy_indices),len(dummy_indices)))
+        for d0 in range(0,len(dummy_indices)-1):
+            print "First dummy has index, ",dummy_indices[d0]
+            for d1 in range(d0+1, len(dummy_indices)):
+                print "testing bond",dummy_indices[d0],dummy_indices[d1], bigmol.get_distance(dummy_indices[d0],dummy_indices[d1])
+                if bigmol.get_distance(dummy_indices[d0],dummy_indices[d1]) < eps:
+                    print "forming bond",dummy_indices[d0],dummy_indices[d1], bigmol.get_distance(dummy_indices[d0],dummy_indices[d1])
+                    bigmol.form_bond(dummy_indices[d0],dummy_indices[d1])
+                    break
+            else: #We fell through without finding a dummy_indices[d0]-X bond
+                print dummy_indices[d0], "Has no close distances to other dummies"
+        else: #Now we fell through the entire list 
+           internal_bonds=False
+                #dummy_distances[d0,d1]=bigmol
+
+                #dummy_distances[d0,d1]=bigmol.get_distance(bigmol[dummy_distances[d0]],bigmol[dummy_distances[d1]]) #HERE MAA
+
+
+#                print dummy_indices[d0],dummy_indices[d1], dmat[dummy_indices[d0],dummy_indices[d1]]
+#                if dmat[dummy_indices[d0],dummy_indices[d1]] < eps:
+#                    bigmol.form_bond(dmat[dummy_indices[d0],dummy_indices[d1]])
+#                    break
+#            break
+#
+#
+#    dummy_distances
+#    print dummy_indices
+#    for d0 in range(0,len(bigmol)):
+#        for d1 in range(d0+1,len(bigmol)):
+#            if bigmol[d0].symbol=='X' and bigmol[d1].symbol=='X':
+#                print d0,d1, dmat[d0,d1]
+#
+#            #if (dmat[d0,d1] <eps) and bigmol[d0].symbol=='X' and bigmol[d1].symbol=='X':
+#                bigmol.form_bond(d0,d1)
+
+
+def update_image_tags(mol,vec):
+    """Update all tags on an image with the translation.
+    Uses 0.1 for x, 0.2 for y and 0.4 for z"""
+    # OLD i.e. tags A,B,C with vec=[0,1,1] => Ayz, Byz, Cyz"""
+    newtag=""
+    dimensions=['x','y','z']
+    #print vec
+    for a in range(len(vec)):
+        if vec[a]:
+            newtag+=dimensions[a]
+    #print newtag
+    for a in mol:
+        if a.tag:
+            a.tag+=newtag
+
+def find_pbc_bond(mol):
+    """Finds a single pbc bond in a supercell"""
+    #Find a tag without an xyz, find the equivalent tag with an xyz, bond it and return
+    dimensions=set(['x','y','z'])
+    eps = 0.5
+
+    #for atom in mol:
+    #    if atom.symbol =='X':
+    #        print atom.index,atom.position,atom.tag, atom.bondlist
+    #return False
+    #print mol.get_cell()
+
+    dummy_indices= [atom.index for atom in mol if atom.symbol=='X']
+    for d0 in range(0,len(dummy_indices)-1):
+        for d1 in range(d0+1, len(dummy_indices)):
+            #We get the two tags and see if they differ by a single character x,y or z
+            tag0=mol[dummy_indices[d0]].tag
+            tag1=mol[dummy_indices[d1]].tag
+            #diff= (set(tag0) - set(tag1))
+            diff= set(tag0).symmetric_difference(set(tag1))
+            #print set(tag0),set(tag1),len(diff), diff
+            if (len(diff) == 1) and diff.issubset(dimensions):
+                #a,=diff unpacks the diff set
+                dist=mol.get_distance(dummy_indices[d0],dummy_indices[d1])
+                dist_test=abs(mol.get_cell()-dist) < eps
+                #print dist_test
+                if dist_test.any():
+                    #if (len(diff) == 1) and diff.issubset(dimensions):
+                    print "forming PBC bond",dummy_indices[d0],dummy_indices[d1],mol.get_distance(dummy_indices[d0],dummy_indices[d1])
+                    mol.form_bond(dummy_indices[d0],dummy_indices[d1])
+                    return True
+    return False

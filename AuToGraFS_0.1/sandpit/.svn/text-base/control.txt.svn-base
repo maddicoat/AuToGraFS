@@ -1,0 +1,5 @@
+model = sqp
+center = cu_pw4
+linker = benzene
+linker = benzene
+supercell = 2,2,1

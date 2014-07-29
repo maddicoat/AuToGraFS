@@ -1,0 +1,14 @@
+from ase.atom import Atom
+from ase.atoms import Atoms
+
+def furthest_dummy(mol):
+    """Takes a mol and returns the distance of the dummy
+    furthest away from the COM"""
+
+    com=mol.get_center_of_mass()
+    dist_array=np.zeros(len(mol))
+    for a in range(0,len(mol)):
+        if mol[a].symbol  == 'X' :
+            D=mol.positions[a]-com
+            dist_array[a]=np.linalg.norm(D)
+    return np.amax(dist_array)

@@ -1,0 +1,6 @@
+model = cube
+center = cu_pw
+linker = benzene
+linker = benzene
+linker = bipy
+supercell = 2,2,2

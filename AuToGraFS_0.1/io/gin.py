@@ -1,0 +1,214 @@
+from ase.atoms import Atoms
+from ase.parallel import paropen
+
+def read_gin(fileobj):
+    """ Read structure in gulp input format.
+        Limited to cartesian co-ordinates and lattice vectors for now."""
+
+    #we'll need this in order to split our atom symbols and types
+    import re
+    import numpy as np
+    r = re.compile("([a-zA-Z]+)([0-9]+)")   
+    
+    if isinstance(fileobj, str):
+        fileobj = open(fileobj)
+
+    image = Atoms()
+    lines = fileobj.readlines()
+    cell=[]
+    symbols = []
+    positions = []
+    mm_numbers = []
+    mmtypes = []
+    mmdict = {}
+    bondlists = []
+
+    #need a bond order dict
+    bo_dict = {}
+    bo_dict['single'] = 1.0
+    bo_dict['double'] = 2.0
+    bo_dict['triple'] = 3.0
+    bo_dict['quadruple'] = 4.0
+    bo_dict['resonant'] = 1.5
+    bo_dict['amide'] = 1.5
+    bo_dict['half'] = 0.5
+    bo_dict['quarter'] = 0.25
+    
+    pbc = False
+    for iline, line in enumerate(lines):
+        inp = line.split()
+        if inp == []:
+            continue
+        if inp[0] == 'vectors':
+            for icell  in range(3):
+                extraline = lines[iline+icell+1]
+                cols = extraline.split()
+                cell.append([float(cols[0]),float(cols[1]),float(cols[2])])
+            image.set_cell(cell)
+            pbc = True
+        elif inp[0] == 'svectors':
+            for icell  in range(2):
+                extraline = lines[iline+icell+1]
+                cols = extraline.split()
+                cell.append([float(cols[0]),float(cols[1]),float(cols[2])])
+            cell.append([0,0,0])
+            image.set_cell(cell)
+            pbc = True
+        else:
+            pass
+            
+    start_reading_coords = False
+    stop_reading_coords = False
+    start_reading_species = False
+    stop_reading_species = False
+    for line in lines:
+        if (line.strip().startswith('#')):
+            pass
+        else:                                          
+            if (line.startswith('cartesian')):
+                start_reading_coords = True
+            if start_reading_coords and not stop_reading_coords:
+                if not line.strip(): 
+                    stop_reading_coords = True
+                    natoms = len(symbols)
+                    bond_matrix=np.zeros((natoms+1,natoms+1)) #one bigger and ignore the zero index
+            if (start_reading_coords and not(stop_reading_coords) and not 'cartesian' in line):
+                alabeltype, junk,  xxx, yyy, zzz = line.split()[:5]
+                #Atomic label and type need to be split
+                m = r.match(alabeltype)
+                symbol = m.group(1)
+                typeno = int(m.group(2))
+                symbols.append(symbol)
+                mm_numbers.append(int(typeno))
+                positions.append([float(xxx), float(yyy), float(zzz)])
+            
+            if ('species' in line.lower()):
+                start_reading_species = True
+            if start_reading_species:
+                if not line.strip(): 
+                    stop_reading_species = True
+            if (start_reading_species and not(stop_reading_species)
+            and not 'species' in line.lower()):
+                alabeltype, mmtype = line.split()[:2]
+                (symbol,typeno) = r.match(alabeltype).groups()
+                mmdict[int(typeno)] = mmtype
+            #connectivity
+            if ('connect' in line.lower()):
+                inp = line.split()
+                a1 = int(inp[1])
+                a2 = int(inp[2])
+                if len(inp)>3:
+                    if not (inp[3].startswith('#')):
+                        bo = bo_dict[inp[3]]
+                    else:
+                        bo = 1.0
+                else:
+                    #print "implicit single bond"
+                    bo = 1.0
+                bond_matrix[a1,a2] = bo
+                bond_matrix[a2,a1] = bo
+    #Now map mmtypes
+    for mtype in mm_numbers:
+        mmtypes.append(mmdict[mtype])
+    #Now form bond dictionaries based on the bond_matrix
+    #print bond_matrix
+    for a1 in range(1,len(symbols)+1):
+        bonddict={}
+        for a2 in range(1,len(symbols)+1):
+            if bond_matrix[a1,a2]:
+                bonddict[a2]=bond_matrix[a1,a2]
+        bondlists.append(bonddict)
+    
+    #print cell
+    if pbc:
+        atoms = Atoms(symbols = symbols, positions = positions, mmtypes = mmtypes, bondlists = bondlists, cell = cell, pbc = pbc) 
+    else:
+        atoms = Atoms(symbols = symbols, positions = positions, mmtypes = mmtypes, bondlists = bondlists)
+    return atoms
+
+def write_gin(fileobj, images):
+    if isinstance(fileobj, str):
+        fileobj = paropen(fileobj, 'w')
+
+    if not isinstance(images, (list, tuple)):
+        images = [images]
+
+    if images[0].pbc.any():
+        if not images[0].get_cell()[2].any():
+            fileobj.write('%s\n' % 'svectors')
+            fileobj.write('%8.3f %8.3f %8.3f \n' %
+                      (images[0].get_cell()[0][0],
+                       images[0].get_cell()[0][1],
+                       images[0].get_cell()[0][2]))
+            fileobj.write('%8.3f %8.3f %8.3f \n' %
+                      (images[0].get_cell()[1][0],
+                       images[0].get_cell()[1][1],
+                       images[0].get_cell()[1][2]))
+        else:
+            fileobj.write('%s\n' % 'vectors')
+            fileobj.write('%8.3f %8.3f %8.3f \n' %
+                      (images[0].get_cell()[0][0],
+                       images[0].get_cell()[0][1],
+                       images[0].get_cell()[0][2]))
+            fileobj.write('%8.3f %8.3f %8.3f \n' %
+                      (images[0].get_cell()[1][0],
+                       images[0].get_cell()[1][1],
+                       images[0].get_cell()[1][2]))
+            fileobj.write('%8.3f %8.3f %8.3f \n' %
+                      (images[0].get_cell()[2][0],
+                       images[0].get_cell()[2][1],
+                       images[0].get_cell()[2][2]))
+
+    fileobj.write('%s\n' % 'cartesian')
+
+    symbols = images[0].get_chemical_symbols()
+
+    #We need to map MMtypes to numbers. We'll do it via a dictionary
+    if any(images[0].get_mmtypes()):
+        mmtypes=images[0].get_mmtypes()
+        symb_types=[]
+        mmdic={}
+        types_seen=1
+        for m,s in zip(mmtypes,symbols):
+            if m not in mmdic:
+                mmdic[m]=s+`types_seen`
+                types_seen+=1
+                symb_types.append(mmdic[m])
+            else:
+                symb_types.append(mmdic[m])
+    else:
+        pass #should do something here
+   
+
+    for atoms in images:
+        for s, (x, y, z), in zip(symb_types, atoms.get_positions()):
+            fileobj.write('%-4s %-7s %15.8f %15.8f %15.8f \n' % (s, '   core',x, y, z))
+
+    fileobj.write('%s\n' % '')
+    #write the bonding
+    if any(images[0].get_bondlists()):
+        bonding=images[0].get_bondlists()
+        for index,b in enumerate(bonding):
+            for k,v in b.items():
+                #print index+1, k, v
+                if k > index and v==4:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' quadruple'))
+                elif k > index and v==3:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' triple'))
+                elif k > index and v==2:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' double'))
+                elif k > index and v==1.5:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' resonant'))
+                elif k > index and v==0.5:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' half'))
+                elif k > index and v==0.25:
+                    fileobj.write('%s %-3d %-3d %10s\n' % ('connect', index+1,k, ' quarter'))
+                elif k > index:
+                    fileobj.write('%s %-3d %-3d \n' % ('connect', index+1,k))
+
+    fileobj.write('%s\n' % '')
+    fileobj.write('%s\n' % 'species')
+    for atoms in images:
+        for  k,v in  mmdic.items():
+            fileobj.write('%-5s %-5s\n' % (v,k))
+    fileobj.write('%s\n' % '')

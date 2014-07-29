@@ -1,0 +1,29 @@
+Data: SBUtype = linker
+Data: shape = linear
+Data: name = 2benz1acetyl  
+GEOMETRY CARTESIAN
+C      -1.93633948      0.05305040      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:6/1.5:7/1.0                                 
+C      -0.54117948      0.05305040      0.00000000     MMTYPE=C_R   QMMM=MM BOND=1/1.5:3/1.5:8/1.0                                 
+C       0.15635852      1.26080140      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:4/1.5:11/1.0                                
+C      -0.54129548      2.46931040     -0.00119900     MMTYPE=C_R   QMMM=MM BOND=3/1.5:5/1.5:9/1.0                                 
+C      -1.93612048      2.46923240     -0.00167800     MMTYPE=C_R   QMMM=MM BOND=4/1.5:6/1.5:10/1.0                                
+C      -2.63372148      1.26102640     -0.00068200     MMTYPE=C_R   QMMM=MM BOND=1/1.5:5/1.5:24/1.0                                
+H      -2.48609848     -0.89926660      0.00045000     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+H       0.00832852     -0.89946260      0.00131500     MMTYPE=H_    QMMM=MM BOND=2/1.0                                             
+H       0.00890452      3.42145340     -0.00125800     MMTYPE=H_    QMMM=MM BOND=4/1.0                                             
+H      -2.48624248      3.42151340     -0.00263100     MMTYPE=H_    QMMM=MM BOND=5/1.0                                             
+C       1.69635826      1.26091343      0.00088786     MMTYPE=C_1   QMMM=MM BOND=3/1.0:12/3.0                                      
+C       2.89755806      1.26100082      0.00158039     MMTYPE=C_1   QMMM=MM BOND=11/3.0:13/1.0                                     
+C       4.43755780      1.26111285      0.00246825     MMTYPE=C_R   QMMM=MM BOND=12/1.0:14/1.5:15/1.5                              
+C       5.13577577      1.26072707     -1.20540714     MMTYPE=C_R   QMMM=MM BOND=13/1.5:16/1.5:17/1.0                              
+C       5.13436686      1.26171117      1.21077488     MMTYPE=C_R   QMMM=MM BOND=13/1.5:18/1.5:19/1.0                              
+C       6.53048765      1.26025773     -1.20488063     MMTYPE=C_R   QMMM=MM BOND=14/1.5:20/1.5:21/1.0                              
+H       4.58613183      1.25947816     -2.15784179     MMTYPE=H_    QMMM=MM BOND=14/1.0                                            
+C       6.52950453      1.26223771      1.21147443     MMTYPE=C_R   QMMM=MM BOND=15/1.5:20/1.5:22/1.0                              
+H       4.58422054      1.26219518      2.16286091     MMTYPE=H_    QMMM=MM BOND=15/1.0                                            
+C       7.22762221      1.26137301      0.00392817     MMTYPE=C_R   QMMM=MM BOND=16/1.5:18/1.5:23/1.0                              
+H       7.08089955      1.25931964     -2.15690078     MMTYPE=H_    QMMM=MM BOND=16/1.0                                            
+H       7.07864021      1.26312484      2.16432460     MMTYPE=H_    QMMM=MM BOND=18/1.0                                            
+X       7.98762217      1.26115801      0.00404229     MMTYPE=H_    QMMM=MM BOND=20/1.0                                            
+X      -3.39372145      1.26115288     -0.00080641     MMTYPE=H_    QMMM=MM BOND=6/1.0                                             
+END

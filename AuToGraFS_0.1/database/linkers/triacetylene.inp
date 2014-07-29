@@ -1,0 +1,13 @@
+Data: SBUtype = linker
+Data: shape = linear
+Data: name = triacetylene  
+GEOMETRY CARTESIAN
+C      -3.28912459      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=2/3.0:8/1.0                                       
+C      -2.08792459      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=1/3.0:3/1.0                                       
+C      -0.54792459      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=2/1.0:4/3.0                                       
+C       0.65327541      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=3/3.0:5/1.0                                       
+C       2.19327541      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=4/1.0:6/3.0                                       
+C       3.39447541      0.34482758      0.00000000     MMTYPE=C_1   QMMM=MM BOND=5/3.0:7/1.0                                       
+X       4.15447541      0.34482758      0.00000000     MMTYPE=H_    QMMM=MM BOND=6/1.0                                             
+X      -4.04912459      0.34482758      0.00000000     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+END

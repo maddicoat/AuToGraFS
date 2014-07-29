@@ -1,0 +1,96 @@
+from ase.atoms import Atoms
+from ase.io.xyz import read_xyz
+from itertools import izip
+import numpy as np
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s2,s3), (s4, s5), ..."
+    a = iter(iterable)
+    return izip(a, a)
+
+
+
+
+def read_com(filename):
+    """Method to read geometry from a g0x input 
+    """
+    from ase import Atoms, Atom
+
+    if isinstance(filename, str):
+        f = open(filename)
+
+    lines = f.readlines()
+
+    start_reading_coords = False
+    stop_reading_coords = False
+    bondlist_present = False
+    start_reading_bondlist = False
+    stop_reading_bondlist = False
+
+    atom_symbols = []
+    atom_mmtypes = []
+    atoms_pos = []
+    bondlists = []
+    natoms=0
+
+    for line in lines:
+        #print line
+        if ('geom=connectivity' in line):
+            #print "Found geom=connectivity"
+            bondlist_present = True
+        if (line.strip().startswith('0')): #The charge and multiplicity line
+            start_reading_coords = True
+            continue
+        if start_reading_coords:
+            if not line: #Blank line
+                stop_reading_coords = True
+                if bondlist_present:
+                    start_reading_bondlist = True
+        if (start_reading_coords and not(stop_reading_coords)):
+            if not line.strip(): #Blank line
+                stop_reading_coords = True
+                if bondlist_present:
+                    natoms=len(atom_symbols)
+                    bond_matrix=np.zeros((natoms+1,natoms+1)) #make it one bigger and ignore the zero index
+                    start_reading_bondlist = True
+                    continue
+            else:        
+                symbol_mm, xxx, yyy, zzz = line.split()[:4]
+                symbol,mmtype = symbol_mm.split('-')
+                atom_symbols.append(symbol)
+                atom_mmtypes.append(mmtype)
+                atoms_pos.append([float(xxx), float(yyy), float(zzz)])
+        if(start_reading_bondlist and not(stop_reading_bondlist)):
+            if not line.strip(): #Blank line
+                stop_reading_bondlist = True
+                continue
+            tmp_bondlist = line.split()
+            #print tmp_bondlist
+            atom_index = int(tmp_bondlist.pop(0))
+            #print atom_index, "=>" ,tmp_bondlist
+            for k, v in pairwise(tmp_bondlist):
+                #print atom_index, "=>", k,v 
+                bond_matrix[atom_index,k] = v
+                bond_matrix[k,atom_index] = v
+
+    #print natoms
+    for atom in range(1,natoms+1):
+        bonddict={}
+        #print "Atom_index =",atom
+        for a2 in range(1,natoms+1):
+            if bond_matrix[atom,a2]:
+                bonddict[a2]=bond_matrix[atom,a2]
+                #print a2,"/",bond_matrix[atom,a2]
+        bondlists.append(bonddict)
+        
+    #print bond_matrix
+    #print bondlists
+    #print atoms_pos
+    #print atom_symbols
+    #print atom_mmtypes
+    #print bondlists
+
+    atoms = Atoms(positions = atoms_pos, symbols = atom_symbols, mmtypes = atom_mmtypes, bondlists = bondlists)
+    
+    return atoms
+

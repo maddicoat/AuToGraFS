@@ -1,0 +1,17 @@
+Data: SBUtype = linker
+Data: shape = rectangle 
+Data: name = benzene_4 
+GEOMETRY CARTESIAN
+C      -1.59615389     -0.87179486      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:6/1.5:9/1.0                                 
+C      -0.20099389     -0.87179486      0.00000000     MMTYPE=C_R   QMMM=MM BOND=1/1.5:3/1.5:10/1.0                                
+C       0.49654411      0.33595614      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:4/1.5:7/1.0                                 
+C      -0.20110989      1.54446514     -0.00119900     MMTYPE=C_R   QMMM=MM BOND=3/1.5:5/1.5:11/1.0                                
+C      -1.59593489      1.54438714     -0.00167800     MMTYPE=C_R   QMMM=MM BOND=4/1.5:6/1.5:12/1.0                                
+C      -2.29353589      0.33618114     -0.00068200     MMTYPE=C_R   QMMM=MM BOND=1/1.5:5/1.5:8/1.0                                 
+H       1.59622411      0.33603614      0.00063400     MMTYPE=H_    QMMM=MM BOND=3/1.0                                             
+H      -3.39313989      0.33636414     -0.00086200     MMTYPE=H_    QMMM=MM BOND=6/1.0                                             
+X      -1.97612199     -1.52999251      0.00031102     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+X       0.17878519     -1.53010104      0.00090883     MMTYPE=H_    QMMM=MM BOND=2/1.0                                             
+X       0.17913887      2.20250076     -0.00123978     MMTYPE=H_    QMMM=MM BOND=4/1.0                                             
+X      -1.97610179      2.20246973     -0.00233658     MMTYPE=H_    QMMM=MM BOND=5/1.0                                             
+END

@@ -1,0 +1,25 @@
+Data: SBUtype = center
+Data: shape = octahedral
+Data: name = Zn paddlewheel
+GEOMETRY CARTESIAN
+O       1.44746289      1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=10/0.5:18/1.5                                     
+O       1.44746289     -1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=3/1.5:9/0.5                                       
+C       1.82994208     -1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:4/1.5:8/1.0                                 
+O       1.44746289     -1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=3/1.5:10/0.5                                      
+X      -2.32177034     -2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=12/1.0                                            
+X      -2.32177034      2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=15/1.0                                            
+X       2.32177034      2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=18/1.0                                            
+X       2.32177034     -2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=3/1.0                                             
+Zn      0.00000000      0.00000000      0.00000000     MMTYPE=Zn4+2 QMMM=MM BOND=2/0.5:10/0.25:11/0.5:14/0.5:17/0.5:20/0.5         
+Zn      0.00000000      0.00000000      2.82128000     MMTYPE=Zn4+2 QMMM=MM BOND=1/0.5:4/0.5:9/0.25:13/0.5:16/0.5:19/0.5           
+O      -1.44746289     -1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=9/0.5:12/1.5                                      
+C      -1.82994208     -1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=5/1.0:11/1.5:13/1.5                               
+O      -1.44746289     -1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=10/0.5:12/1.5                                     
+O      -1.44746289      1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=9/0.5:15/1.5                                      
+C      -1.82994208      1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=6/1.0:14/1.5:16/1.5                               
+O      -1.44746289      1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=10/0.5:15/1.5                                     
+O       1.44746289      1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=9/0.5:18/1.5                                      
+C       1.82994208      1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=1/1.5:7/1.0:17/1.5                                
+X       0.00000000      0.00000000      3.86128000     MMTYPE=N_R   QMMM=MM BOND=10/0.5                                            
+X       0.00000000      0.00000000     -1.04000000     MMTYPE=N_R   QMMM=MM BOND=9/0.5                                             
+END

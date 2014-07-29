@@ -1,0 +1,269 @@
+#!/usr/bin/python
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.calculators.neighborlist import * 
+from ase.align import *
+from ase.data import *
+from ase.data.uff_atomtypes import *
+
+from collections import Counter
+from math import pi
+from ase.io import read, write
+import numpy as np
+import operator
+import argparse
+
+parser = argparse.ArgumentParser(description="Generate an input file with connectivity and bond info from an experimental cif.")
+parser.add_argument("-i", "--inputfile", nargs="?", type=str, default="in.cif",
+                           help="input cif file, default=in.cif")
+parser.add_argument("-o", "--output-prefix", nargs="?", type=str, default="out",
+                   help="output file for structure, default=out")
+parser.add_argument("-e", "--output-extn", type=str, default="gin",
+                   help="extn (format) for the generated mof, default=gin")
+
+args = parser.parse_args()
+output=args.output_prefix+'.'+args.output_extn
+
+rad2deg=180.0/pi
+CC_eps = 0.1 #Ang
+angle_eps=2.5 #Degrees
+
+mol = read(args.inputfile)
+
+cov_rad=[]
+for atom in mol:
+    cov_rad.append(covalent_radii[atom.number])
+
+write('mol.xyz',mol)
+
+env_list = [] #list for the symbol strings
+
+bond_matrix=np.zeros((len(mol)+1,len(mol)+1)) #make it one bigger and ignore the zero index
+bond_lock=np.zeros((len(mol)+1,len(mol)+1)) #make it one bigger and ignore the zero index
+
+nlist = NeighborList(cov_rad,self_interaction=False,bothways=True)
+nlist.build(mol)
+for atom in mol:
+    symbols = []
+    distances = []
+    bonddict={}
+    indices, offsets = nlist.get_neighbors(atom.index)
+    #first thing, we'll start filling in the bond matrix. Everything will be single bonded
+    for index in indices:
+        bond_matrix[atom.index+1,index+1] = 1.0 
+        bond_matrix[index+1,atom.index+1] = 1.0 
+
+    #print ""       
+    #print "Atom ", atom.index+1, atom.symbol
+    symbols = ([mol[index].symbol for index in indices])
+    symbol_string = ''.join(sorted([mol[index].symbol for index in indices]))
+    symbol_count = Counter()
+    for asymb in symbols:
+        symbol_count[asymb] += 1
+
+    if atom.symbol == 'C' or atom.symbol == 'N':
+        #Look for angles adding to 360 deg
+        angles=[]
+        for a1 in xrange(len(indices)-1):
+            for a2 in xrange(a1+1,len(indices)):
+                angles.append(mol.get_angle([indices[a1],atom.index,indices[a2]])*rad2deg)
+        #print angles
+        ##angles don't deal with pbc at all, so the commented line below doesn't work
+        #if abs(sum(angles) - 360) <angle_eps and not any((True for angle in angles if abs(angle - 180) < angle_eps*2)): #Aiming to filer out anything that's actually linear
+        if any((True for angle in angles if abs(angle - 120) < angle_eps*2)): #Aiming to filer out anything that's actually linear
+            #print "Here!", sum(angles)
+            #Then it's planar
+            distances = sorted([mol.get_distance(atom.index,a2,mic=True) for a2 in indices if mol[a2].symbol!='H'])
+            if len(distances)==2:
+                #print distances
+                if abs(distances[0] - distances[1]) < CC_eps:
+                    #Then it's aromatic
+                    symbol_string = ''.join([symbol_string,'*'])
+                    for a2 in indices:
+                        if mol[a2].symbol!='H':
+                            bond_matrix[atom.index+1,a2+1] = 1.5 
+                            bond_matrix[a2+1,atom.index+1] = 1.5 
+                            bond_lock[atom.index+1,a2+1] = 1
+                            bond_lock[a2+1,atom.index+1] = 1 
+            if len(distances)==3:
+                #print distances
+                #Two small and one big means aromatic
+                #Two big and one small means >C=R
+                #A bit of extra work, but we're going to employ a dictionary here
+                dist_dict = {}
+                for a2 in indices:
+                    dist_dict[a2] = mol.get_distance(atom.index,a2,mic=True) 
+                sorted_dists = sorted(dist_dict.iteritems(), key=operator.itemgetter(1))
+                #print sorted_dists
+                #print sorted_dists[0][0], sorted_dists[1][0]
+                if abs(distances[0] - distances[1]) < abs(distances[1] - distances[2]): #Two small
+                    symbol_string = ''.join([symbol_string,'*'])
+                    bond_matrix[atom.index+1,sorted_dists[0][0]+1] = 1.5
+                    bond_matrix[sorted_dists[0][0]+1,atom.index+1] = 1.5
+                    bond_matrix[atom.index+1,sorted_dists[1][0]+1] = 1.5
+                    bond_matrix[sorted_dists[1][0]+1,atom.index+1] = 1.5
+                    bond_lock[atom.index+1,sorted_dists[0][0]+1] = 1
+                    bond_lock[sorted_dists[0][0]+1,atom.index+1] = 1
+                    bond_lock[atom.index+1,sorted_dists[1][0]+1] = 1
+                    bond_lock[sorted_dists[1][0]+1,atom.index+1] = 1
+                    #Could have three equal (e.g. naphthalene)
+                    if abs(distances[0] - distances[2]) < 0.015: #
+                        bond_matrix[atom.index+1,sorted_dists[2][0]+1] = 1.5
+                        bond_matrix[sorted_dists[2][0]+1,atom.index+1] = 1.5
+                        bond_lock[atom.index+1,sorted_dists[2][0]+1] = 1
+                        bond_lock[sorted_dists[2][0]+1,atom.index+1] = 1
+                else: #two big
+                    bond_matrix[atom.index+1,sorted_dists[0][0]+1] = 2
+                    bond_matrix[sorted_dists[0][0]+1,atom.index+1] = 2
+                    bond_lock[atom.index+1,sorted_dists[0][0]+1] = 1
+                    bond_lock[sorted_dists[0][0]+1,atom.index+1] = 1
+                    bond_lock[atom.index+1,sorted_dists[1][0]+1] = 1
+                    bond_lock[sorted_dists[1][0]+1,atom.index+1] = 1
+                    bond_lock[atom.index+1,sorted_dists[2][0]+1] = 1
+                    bond_lock[sorted_dists[2][0]+1,atom.index+1] = 1
+
+    #Now we need to assign UFF atom types to each atom based on its environment
+    #Multiple environments may correspond to the same atom type
+    this_atype=[]
+    asymb=atom.symbol
+    if len(asymb)==1:
+        asymb=''.join([asymb,'_'])
+    options = ([atype for atype in uff_atypes.keys() if atype.startswith(asymb)])
+    #print options 
+    #This tool will ignore 'H_b' until a specific use case is identified    
+    if asymb == 'H_':    
+        this_atype = ([atype for atype in options if atype.endswith('H_')]) 
+    #We'll have starred anything above if it should be aromatic
+    elif symbol_string.endswith('*'):
+        this_atype = ([atype for atype in options if atype.endswith('R')])
+    #Now we test for number of connections
+    else:
+        #if atomic number is above 20 we'll allow greater than or equal, such that both 5-connected and 6-connected things match for M6
+        if atom.number >20:
+            this_atype = ([atype for atype in options if uff_atypes[atype][0]>=len(indices)]) 
+        else:
+            this_atype = ([atype for atype in options if uff_atypes[atype][0]==len(indices) and not atype.endswith('R')])
+    
+    
+    #print atom.index+1, atom.symbol,this_atype
+    if len(this_atype)>1: 
+        #Now we need to look at angles 
+        angles=[]
+        ref_angles= ([uff_atypes[atype][1] for atype in this_atype])
+        for a1 in xrange(len(indices)-1):
+            for a2 in xrange(a1+1,len(indices)):
+                angles.append(mol.get_angle([indices[a1],atom.index,indices[a2]])*rad2deg)
+        for atype in this_atype:
+            if any((True for angle in angles if abs(angle - uff_atypes[atype][1]) < angle_eps)):
+                #print "Assigned ",atype
+                this_atype = [atype]
+                break
+
+    #print atom.index+1, atom.symbol,symbol_string,this_atype
+    env_list.append(symbol_string)
+    atom.mmtype = this_atype[0]
+
+
+    #Now finish off the bondlists
+    #We'll loop over the bond matrix and anything that has a value of 1 may be updated. This prevents accidentally overwriting any changes we've made above
+    #print "Atom_index =",atom
+    for a2 in indices:
+        if mol[a2].symbol=='H':
+            continue
+        if bond_lock[atom.index+1,a2+1] != 1: #This prevents accidentally overwriting any changes we've made above
+            this_distance = mol.get_distance(atom.index,a2,mic=True)
+            this_covrad = covalent_radii[atom.number] + covalent_radii[mol[a2].number]
+            #print atom.symbol, mol[a2].symbol, this_distance, this_covrad
+            if this_distance > this_covrad:
+                bond_matrix[atom.index+1,a2+1] = 0.5
+                bond_matrix[a2+1,atom.index+1] = 0.5
+            elif this_distance < this_covrad - 0.3: #Triple
+                bond_matrix[atom.index+1,a2+1] = 3.0
+                bond_matrix[a2+1,atom.index+1] = 3.0
+            elif this_distance < this_covrad - 0.15: #Double
+                bond_matrix[atom.index+1,a2+1] = 2.0
+                bond_matrix[a2+1,atom.index+1] = 2.0
+
+#Now form bond dictionaries based on the bond_matrix
+for atom in range(1,len(mol)+1):
+    bonddict={}
+    for a2 in range(1,len(mol)+1):
+        if bond_matrix[atom,a2]:
+            bonddict[a2]=bond_matrix[atom,a2]
+    mol[atom-1].bondlist = bonddict
+
+write(output,mol)
+
+env_count = Counter()
+for env in env_list:
+    env_count[env] += 1
+
+print "Report:" 
+print "Based only on the atomic number of neighbours, there were "+`len(env_count)`+" unique environments found"
+print "They were:"
+#for env in env_count:
+#print env_count, len(env_count)
+
+#print uff_atypes
+#for env in env_count.keys():
+#    print env
+
+##Now we need to assign UFF atom types to each atom based on its environment
+##Multiple environments may correspond to the same atom type
+#for index in xrange(len(mol)):
+#    this_atype=[]
+#    asymb=mol[index].symbol
+#    if len(asymb)==1:
+#        asymb=''.join([asymb,'_'])
+#    options = ([atype for atype in uff_atypes.keys() if atype.startswith(asymb)])
+#    print options 
+#    #This tool will ignore 'H_b' until a specific use case is identified    
+#    if asymb == 'H_':    
+#        this_atype = ([atype for atype in options if atype.endswith('H_')]) 
+#    #We'll have starred anything above if it should be aromatic
+#    elif env_list[index].endswith('*'):
+#        this_atype = ([atype for atype in options if atype.endswith('R')])
+#    #Now we test for number of connections
+#    else:
+#        #print env_list[index]
+#        #if atomic number is above 20 we'll allow greater than or equal, such that both 5-connected and 6-connected things match for M6
+#        if mol[index].number >20:
+#            this_atype = ([atype for atype in options if uff_atypes[atype][0]>=n_conn[index]]) 
+#        else:
+#            this_atype = ([atype for atype in options if uff_atypes[atype][0]==n_conn[index] and not atype.endswith('R')])
+#       # #del options from the list of options is there are less connections than required
+#       # for atype in options:
+#       #     if uff_atypes[atype]<n_conn[index]:
+#       #         options.remove(atype)
+#       #         print "Removing ",atype, uff_atypes[atype], n_conn[index]
+#       #     else:
+#       #         print "Not removing ",atype, uff_atypes[atype], n_conn[index]
+#        #options.remove([[atype for atype in options if uff_atypes[atype]<n_conn[index]]])
+#        #print "Valid options: ", this_atype
+#
+#
+#    if len(this_atype)>1: 
+#        pass
+#        #Now we need to look at angles 
+#    #We still need to drop back to atom index to eventually form labels like "Fe1", "C2" etc for gulp input
+#    atype_dict[index] = this_atype #forming a list of lists
+#
+    #print index+1, mol[index].symbol, env_list[index], this_atype
+
+#for k,v in atype_dict.items():
+#   print k,v
+
+    #atype_dict = {} # dictionary [index]-> atype. Allows for pre-assignment of aromatic C 
+
+#blah = sorted([mol[index].get_atomic_number() for index in indices])
+    #print symbols
+    #print distances
+    #N = len(blah)
+    #dis = np.concatenate(([0], np.arange(1, N)[blah[1:] != blah[:-1]]))
+    #print dis
+    #repeat = np.append(dis[1:], N) - dis
+    #symbols = ''.join([chemical_symbols[blah[d]] + str(r) * (r != 1)
+    #                   for r, d in zip(repeat, dis)])
+    #print indices
+#    print sorted(blah)
+

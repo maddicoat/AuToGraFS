@@ -1,0 +1,17 @@
+Data: SBUtype = linker
+Data: shape = linear
+Data: name = R2_benzene  
+GEOMETRY CARTESIAN
+C      -0.25198938     -0.07957560      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:6/1.5:7/1.0                                 
+C       1.14317062     -0.07957560      0.00000000     MMTYPE=C_R   QMMM=MM BOND=1/1.5:3/1.5:8/1.0                                 
+C       1.84070862      1.12817540      0.00000000     MMTYPE=C_R   QMMM=MM BOND=2/1.5:4/1.5:11/1.0                                
+C       1.14305462      2.33668440     -0.00119900     MMTYPE=C_R   QMMM=MM BOND=3/1.5:5/1.5:10/1.0                                
+C      -0.25177038      2.33660640     -0.00167800     MMTYPE=C_R   QMMM=MM BOND=4/1.5:6/1.5:9/1.0                                 
+C      -0.94937138      1.12840040     -0.00068200     MMTYPE=C_R   QMMM=MM BOND=1/1.5:5/1.5:12/1.0                                
+H      -0.80174838     -1.03189260      0.00045000     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+H       1.69267862     -1.03208860      0.00131500     MMTYPE=H_    QMMM=MM BOND=2/1.0                                             
+H      -0.80189238      3.28888740     -0.00263100     MMTYPE=H_    QMMM=MM BOND=5/1.0                                             
+Br      2.09867980      3.99043182     -0.00130148     MMTYPE=Br    QMMM=MM BOND=4/1.0                                             
+X       2.60070849      1.12823069      0.00043816     MMTYPE=H_    QMMM=MM BOND=3/1.0                                             
+X      -1.70937136      1.12852689     -0.00080641     MMTYPE=H_    QMMM=MM BOND=6/1.0                                             
+END

@@ -1,0 +1,23 @@
+Data: SBUtype = center
+Data: shape = square
+Data: name = Zn paddlewheel
+GEOMETRY CARTESIAN
+Zn      0.00000000      0.00000000      0.00000000     MMTYPE=Zn4+2 QMMM=MM BOND=8/0.5:10/0.5:12/0.5:14/0.5:2/0.25                        
+Zn      0.00000000      0.00000000      2.82128000     MMTYPE=Zn4+2 QMMM=MM BOND=7/0.5:9/0.5:11/0.5:13/0.5:1/0.25                         
+C       1.82994208     -1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=8/1.5:9/1.5:18/1.0                                
+C      -1.82994208     -1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=10/1.5:11/1.5:15/1.0                              
+C      -1.82994208      1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=12/1.5:13/1.5:16/1.0                              
+C       1.82994208      1.86447404      1.41064000     MMTYPE=C_R   QMMM=MM BOND=7/1.5:14/1.5:17/1.0                               
+O       1.44746289      1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=2/0.5:6/1.5                                       
+O       1.44746289     -1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=1/0.5:3/1.5                                       
+O       1.44746289     -1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=2/0.5:3/1.5                                       
+O      -1.44746289     -1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=1/0.5:4/1.5                                       
+O      -1.44746289     -1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=2/0.5:4/1.5                                       
+O      -1.44746289      1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=1/0.5:5/1.5                                       
+O      -1.44746289      1.47467841      2.55492409     MMTYPE=O_2   QMMM=MM BOND=2/0.5:5/1.5                                       
+O       1.44746289      1.47467841      0.26635592     MMTYPE=O_2   QMMM=MM BOND=1/0.5:6/1.5                                       
+X      -2.32177034     -2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=4/1.0                                             
+X      -2.32177034      2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=5/1.0                                             
+X       2.32177034      2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=6/1.0                                             
+X       2.32177034     -2.36538218      1.41064000     MMTYPE=C_R   QMMM=MM BOND=3/1.0                                             
+END

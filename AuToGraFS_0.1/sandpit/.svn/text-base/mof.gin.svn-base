@@ -1,0 +1,313 @@
+vectors
+  21.676    0.000    0.000 
+   0.000   21.676    0.000 
+   0.000    0.000    6.558 
+cartesian
+C1      core      0.00538497      2.52788644     -0.00021852 
+O2      core      0.00995070      1.97876148     -1.14825117 
+Cu3     core      0.00056658     -0.00064725     -1.21697657 
+O2      core     -0.00798954     -1.97956238     -1.14846071 
+C1      core     -0.00309853     -2.52773847     -0.00019625 
+O2      core     -0.00511019     -1.97893865      1.14804077 
+Cu3     core     -0.00086989      0.00028297      1.21712742 
+O2      core     -1.97971265      0.00114956      1.14926128 
+C1      core     -2.52768890      0.00971108      0.00065747 
+O2      core     -1.97888369      0.00680627     -1.14717349 
+O2      core      0.00292268      1.97983429      1.14809054 
+O2      core      1.97858311     -0.00059293      1.14713262 
+C1      core      2.52762036     -0.00758365     -0.00048444 
+O2      core      1.97977924     -0.00771898     -1.14905749 
+C1      core      4.02760873     -0.01170253     -0.00000025 
+C1      core      4.72571190     -0.01170253      1.20698366 
+C1      core      6.11207538     -0.01170253      1.20698420 
+C1      core      6.81017726     -0.01170253      0.00000025 
+C1      core      6.11207643     -0.01170253     -1.20698293 
+C1      core      4.72571104     -0.01170253     -1.20698286 
+H4      core      6.58671280     -0.01170253     -2.02872869 
+H4      core      4.25107508     -0.01170253      2.02872807 
+H4      core      4.25107399     -0.01170253     -2.02872809 
+H4      core      6.58671295     -0.01170253      2.02872779 
+C1      core      0.00405854      4.02788515     -0.00055988 
+C1      core      0.00405854      4.72598832      1.20642402 
+C1      core      0.00405854      6.11235181      1.20642457 
+C1      core      0.00405854      6.81045368     -0.00055939 
+C1      core      0.00405854      6.11235285     -1.20754256 
+C1      core      0.00405854      4.72598746     -1.20754249 
+H4      core      0.00405854      6.58698923     -2.02928832 
+H4      core      0.00405854      4.25135151      2.02816844 
+H4      core      0.00405854      4.25135041     -2.02928773 
+H4      core      0.00405854      6.58698937      2.02816815 
+C1      core      0.00538497     13.36607206     -0.00021852 
+O2      core      0.00995070     12.81694710     -1.14825117 
+Cu3     core      0.00056658     10.83753838     -1.21697657 
+O2      core     -0.00798954      8.85862325     -1.14846071 
+C1      core     -0.00309853      8.31044715     -0.00019625 
+O2      core     -0.00511019      8.85924698      1.14804077 
+Cu3     core     -0.00086989     10.83846859      1.21712742 
+O2      core     -1.97971265     10.83933519      1.14926128 
+C1      core     -2.52768890     10.84789670      0.00065747 
+O2      core     -1.97888369     10.84499190     -1.14717349 
+O2      core      0.00292268     12.81801992      1.14809054 
+O2      core      1.97858311     10.83759269      1.14713262 
+C1      core      2.52762036     10.83060197     -0.00048444 
+O2      core      1.97977924     10.83046665     -1.14905749 
+C1      core      4.02760873     10.82648309     -0.00000025 
+C1      core      4.72571190     10.82648309      1.20698366 
+C1      core      6.11207538     10.82648309      1.20698420 
+C1      core      6.81017726     10.82648309      0.00000025 
+C1      core      6.11207643     10.82648309     -1.20698293 
+C1      core      4.72571104     10.82648309     -1.20698286 
+H4      core      6.58671280     10.82648309     -2.02872869 
+H4      core      4.25107508     10.82648309      2.02872807 
+H4      core      4.25107399     10.82648309     -2.02872809 
+H4      core      6.58671295     10.82648309      2.02872779 
+C1      core      0.00405854     14.86607078     -0.00055988 
+C1      core      0.00405854     15.56417394      1.20642402 
+C1      core      0.00405854     16.95053743      1.20642457 
+C1      core      0.00405854     17.64863930     -0.00055939 
+C1      core      0.00405854     16.95053847     -1.20754256 
+C1      core      0.00405854     15.56417308     -1.20754249 
+H4      core      0.00405854     17.42517485     -2.02928832 
+H4      core      0.00405854     15.08953713      2.02816844 
+H4      core      0.00405854     15.08953604     -2.02928773 
+H4      core      0.00405854     17.42517499      2.02816815 
+C1      core     10.84321710      2.52788644     -0.00021852 
+O2      core     10.84778283      1.97876148     -1.14825117 
+Cu3     core     10.83839871     -0.00064725     -1.21697657 
+O2      core     10.82984258     -1.97956238     -1.14846071 
+C1      core     10.83473359     -2.52773847     -0.00019625 
+O2      core     10.83272194     -1.97893865      1.14804077 
+Cu3     core     10.83696224      0.00028297      1.21712742 
+O2      core      8.85811948      0.00114956      1.14926128 
+C1      core      8.31014323      0.00971108      0.00065747 
+O2      core      8.85894844      0.00680627     -1.14717349 
+O2      core     10.84075480      1.97983429      1.14809054 
+O2      core     12.81641523     -0.00059293      1.14713262 
+C1      core     13.36545249     -0.00758365     -0.00048444 
+O2      core     12.81761136     -0.00771898     -1.14905749 
+C1      core     14.86544085     -0.01170253     -0.00000025 
+C1      core     15.56354402     -0.01170253      1.20698366 
+C1      core     16.94990751     -0.01170253      1.20698420 
+C1      core     17.64800938     -0.01170253      0.00000025 
+C1      core     16.94990855     -0.01170253     -1.20698293 
+C1      core     15.56354316     -0.01170253     -1.20698286 
+H4      core     17.42454493     -0.01170253     -2.02872869 
+H4      core     15.08890721     -0.01170253      2.02872807 
+H4      core     15.08890611     -0.01170253     -2.02872809 
+H4      core     17.42454507     -0.01170253      2.02872779 
+C1      core     10.84189067      4.02788515     -0.00055988 
+C1      core     10.84189067      4.72598832      1.20642402 
+C1      core     10.84189067      6.11235181      1.20642457 
+C1      core     10.84189067      6.81045368     -0.00055939 
+C1      core     10.84189067      6.11235285     -1.20754256 
+C1      core     10.84189067      4.72598746     -1.20754249 
+H4      core     10.84189067      6.58698923     -2.02928832 
+H4      core     10.84189067      4.25135151      2.02816844 
+H4      core     10.84189067      4.25135041     -2.02928773 
+H4      core     10.84189067      6.58698937      2.02816815 
+C1      core     10.84321710     13.36607206     -0.00021852 
+O2      core     10.84778283     12.81694710     -1.14825117 
+Cu3     core     10.83839871     10.83753838     -1.21697657 
+O2      core     10.82984258      8.85862325     -1.14846071 
+C1      core     10.83473359      8.31044715     -0.00019625 
+O2      core     10.83272194      8.85924698      1.14804077 
+Cu3     core     10.83696224     10.83846859      1.21712742 
+O2      core      8.85811948     10.83933519      1.14926128 
+C1      core      8.31014323     10.84789670      0.00065747 
+O2      core      8.85894844     10.84499190     -1.14717349 
+O2      core     10.84075480     12.81801992      1.14809054 
+O2      core     12.81641523     10.83759269      1.14713262 
+C1      core     13.36545249     10.83060197     -0.00048444 
+O2      core     12.81761136     10.83046665     -1.14905749 
+C1      core     14.86544085     10.82648309     -0.00000025 
+C1      core     15.56354402     10.82648309      1.20698366 
+C1      core     16.94990751     10.82648309      1.20698420 
+C1      core     17.64800938     10.82648309      0.00000025 
+C1      core     16.94990855     10.82648309     -1.20698293 
+C1      core     15.56354316     10.82648309     -1.20698286 
+H4      core     17.42454493     10.82648309     -2.02872869 
+H4      core     15.08890721     10.82648309      2.02872807 
+H4      core     15.08890611     10.82648309     -2.02872809 
+H4      core     17.42454507     10.82648309      2.02872779 
+C1      core     10.84189067     14.86607078     -0.00055988 
+C1      core     10.84189067     15.56417394      1.20642402 
+C1      core     10.84189067     16.95053743      1.20642457 
+C1      core     10.84189067     17.64863930     -0.00055939 
+C1      core     10.84189067     16.95053847     -1.20754256 
+C1      core     10.84189067     15.56417308     -1.20754249 
+H4      core     10.84189067     17.42517485     -2.02928832 
+H4      core     10.84189067     15.08953713      2.02816844 
+H4      core     10.84189067     15.08953604     -2.02928773 
+H4      core     10.84189067     17.42517499      2.02816815 
+
+connect 1   25  
+connect 1   2     resonant
+connect 1   11    resonant
+connect 2   3   
+connect 3   4         half
+connect 3   10        half
+connect 3   14        half
+connect 3   7   
+connect 4   5     resonant
+connect 5   62  
+connect 5   6     resonant
+connect 6   7   
+connect 7   8         half
+connect 7   11        half
+connect 7   12        half
+connect 8   9     resonant
+connect 9   10    resonant
+connect 9   86  
+connect 12  13    resonant
+connect 13  14    resonant
+connect 13  15  
+connect 15  16    resonant
+connect 15  20    resonant
+connect 16  17    resonant
+connect 16  22  
+connect 17  24  
+connect 17  18    resonant
+connect 18  19    resonant
+connect 18  77  
+connect 19  20    resonant
+connect 19  21  
+connect 20  23  
+connect 25  26    resonant
+connect 25  30    resonant
+connect 26  32  
+connect 26  27    resonant
+connect 27  28    resonant
+connect 27  34  
+connect 28  29    resonant
+connect 28  39  
+connect 29  30    resonant
+connect 29  31  
+connect 30  33  
+connect 35  59  
+connect 35  36    resonant
+connect 35  45    resonant
+connect 36  37  
+connect 37  48        half
+connect 37  41  
+connect 37  38        half
+connect 37  44        half
+connect 38  39    resonant
+connect 39  40    resonant
+connect 40  41  
+connect 41  42        half
+connect 41  46        half
+connect 41  45        half
+connect 42  43    resonant
+connect 43  120 
+connect 43  44    resonant
+connect 46  47    resonant
+connect 47  48    resonant
+connect 47  49  
+connect 49  50    resonant
+connect 49  54    resonant
+connect 50  56  
+connect 50  51    resonant
+connect 51  52    resonant
+connect 51  58  
+connect 52  53    resonant
+connect 52  111 
+connect 53  54    resonant
+connect 53  55  
+connect 54  57  
+connect 59  64    resonant
+connect 59  60    resonant
+connect 60  66  
+connect 60  61    resonant
+connect 61  68  
+connect 61  62    resonant
+connect 62  63    resonant
+connect 63  64    resonant
+connect 63  65  
+connect 64  67  
+connect 69  93  
+connect 69  70    resonant
+connect 69  79    resonant
+connect 70  71  
+connect 71  72        half
+connect 71  82        half
+connect 71  75  
+connect 71  78        half
+connect 72  73    resonant
+connect 73  74    resonant
+connect 73  130 
+connect 74  75  
+connect 75  80        half
+connect 75  79        half
+connect 75  76        half
+connect 76  77    resonant
+connect 77  78    resonant
+connect 80  81    resonant
+connect 81  82    resonant
+connect 81  83  
+connect 83  88    resonant
+connect 83  84    resonant
+connect 84  90  
+connect 84  85    resonant
+connect 85  92  
+connect 85  86    resonant
+connect 86  87    resonant
+connect 87  88    resonant
+connect 87  89  
+connect 88  91  
+connect 93  98    resonant
+connect 93  94    resonant
+connect 94  100 
+connect 94  95    resonant
+connect 95  96    resonant
+connect 95  102 
+connect 96  97    resonant
+connect 96  107 
+connect 97  98    resonant
+connect 97  99  
+connect 98  101 
+connect 103 104   resonant
+connect 103 113   resonant
+connect 103 127 
+connect 104 105 
+connect 105 112       half
+connect 105 106       half
+connect 105 116       half
+connect 105 109 
+connect 106 107   resonant
+connect 107 108   resonant
+connect 108 109 
+connect 109 114       half
+connect 109 110       half
+connect 109 113       half
+connect 110 111   resonant
+connect 111 112   resonant
+connect 114 115   resonant
+connect 115 116   resonant
+connect 115 117 
+connect 117 122   resonant
+connect 117 118   resonant
+connect 118 124 
+connect 118 119   resonant
+connect 119 120   resonant
+connect 119 126 
+connect 120 121   resonant
+connect 121 122   resonant
+connect 121 123 
+connect 122 125 
+connect 127 128   resonant
+connect 127 132   resonant
+connect 128 129   resonant
+connect 128 134 
+connect 129 136 
+connect 129 130   resonant
+connect 130 131   resonant
+connect 131 132   resonant
+connect 131 133 
+connect 132 135 
+
+species
+Cu3   Cu6+2
+C1    C_R  
+H4    H_   
+O2    O_2  
+

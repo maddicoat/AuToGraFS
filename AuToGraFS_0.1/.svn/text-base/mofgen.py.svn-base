@@ -1,0 +1,153 @@
+#!/usr/bin/python
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.align import *
+
+from ase.io import read, write
+import argparse
+
+parser = argparse.ArgumentParser(description="Generate a defined framework structure.")
+parser.add_argument("-c", "--controlfile", nargs="?", type=str, default="control.txt", 
+                   help="control file for the mof generator, default=control.txt")
+parser.add_argument("-o", "--output-prefix", nargs="?", type=str, default="mof", 
+                   help="output file for generated mof, default=mof")
+parser.add_argument("-e", "--output-extn", type=str, default="gin", 
+                   help="extn (format) for the generated mof, default=gin")
+parser.add_argument("-s", "--supercell", type=int, nargs="*", default=None, 
+                   help="optional production of supercell. Default is None. Argument may be one integer or three.")
+
+args = parser.parse_args()
+#print args
+output=args.output_prefix+'.'+args.output_extn
+xyz_output=args.output_prefix+'.xyz'
+cell_dim=args.supercell
+
+
+#Now set up some default locations for things. 
+basepath="/home/maddicoat/src/ase/ase/database/"
+modelpath="models/"
+centerpath="centers/"
+linkerpath="linkers/"
+
+control = open(args.controlfile)
+lines = control.readlines()
+mol_spec=[]
+frag_types=[]
+info_spec=[]
+#first line is either requesting a model or a topology. Handling is different in each case
+if 'model' in lines[0]:
+    for line in lines:
+        (name,val) = line.split('=',1)
+        name = name.strip().lower()
+        val = val.strip() 
+        #val may still have other stuff attached to it
+        print name,val
+        if name =='model':
+            modelfile = val+'.model'
+        elif name == 'center' or name == 'linker':
+            frag_types.append(name)
+            #do we have other stuff attached here?
+            info_flag = len(val.split(' '))
+            #print info_flag
+            if info_flag >= 1:
+                mol_spec.append(val)
+                info_spec.append(None)
+            else:
+                sbu_spec=[]
+                sbu_spec=val.split(' ')
+                #print sbu_spec
+                mol_spec.append(sbu_spec.pop(0))
+                #print sbu_spec
+                info_spec.append(sbu_spec)
+        elif name =='supercell':
+            cell_dim=[]
+            if not "," in val:
+                x = int(val.strip())
+                cell_dim=[x,x,x]
+            else:
+                val.strip()
+                (x,y,z) = val.split(',') 
+                cell_dim = map(int,[x,y,z])
+            #print cell_dim
+
+elif 'topology' in lines[0]:
+    if name == 'topology':
+
+        modelfile = val+'.model' #will be created
+
+
+#print cell_dim[1]+3
+
+#modelfile
+try:
+    model=read(modelfile)
+except IOError:
+    path=basepath+modelpath+modelfile
+    model=read(path)
+
+
+#controlfile
+fragments={}
+for obj in xrange(0, len(mol_spec)):
+    name = obj
+    filename = mol_spec[obj]+'.inp'
+    try:
+        fragments[name]=read(filename)
+        fragments[name].fragmentIDs=obj
+    except IOError:
+        path=basepath+frag_types[obj]+'s/'+filename
+        fragments[name]=read(path)
+        fragments[name].fragmentIDs=obj
+    if info_spec[obj]:
+        for attr in info_spec[obj]:
+            #We may have either keywords with value (i.e. rotate=90) or bare keywords, which we can set to true
+            option_type= len(attr.split('='))
+            if option_type == 1: #binary
+                fragments[name].info[attr.strip().lower()] = True
+            if option_type == 2:
+                (k,v) =attr.split('=')  
+                fragments[name].info[k.lower()] = float(v)
+#            fragments[name].info.update(info_spec[obj])
+    align(fragments[name],model[name])
+   #outfile = 'aligned'+`obj`+'.xyz'
+   #write(outfile,fragments[name])
+   #outfile = 'model_aligned'+`obj`+'.xyz'
+   #write(outfile,model[name])
+
+test_mol = Atoms()
+for obj in xrange(0, len(mol_spec)):
+    test_mol += fragments[obj]
+
+write('test_mol.xyz',test_mol)
+
+
+#if not args.supercell:
+if cell_dim is None: 
+    mof=assemble(model,fragments)
+    #write("assembled.xyz",mof)
+    print mof.cell
+    if model[0].info['build'].strip() == 'exact':
+        cell=frame_cell(model,fragments)
+        mof.set_cell(cell)
+        mof.set_pbc(cell)
+    elif model[0].info['build'].strip() == 'systre':
+        mof.set_pbc(mof.cell)
+    mof=bond_frame(mof,periodic=True)
+    write(output,mof)    
+    write(xyz_output,mof)    
+else:
+    mof=assemble(model,fragments)
+    cell=frame_cell(model,fragments)
+    mof.set_cell(cell)
+    mof.set_pbc(cell)
+    bigmof=make_supercell(mof,cell_dim)
+    write(output,bigmof)    
+    write(xyz_output,bigmof)    
+ 
+frags_output='frags.out'
+f = open(frags_output, 'w')
+for n, s, (x, y, z), i in zip(mof.get_current_indices(),mof.get_chemical_symbols(), mof.get_positions(), mof.get_fragmentIDs()):
+    f.write('%-5d %-2s %15.8f %15.8f %15.8f %6d\n' % (n, s, x, y, z , i))
+ 
+
+

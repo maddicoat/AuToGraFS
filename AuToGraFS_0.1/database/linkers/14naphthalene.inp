@@ -1,0 +1,23 @@
+Data: SBUtype = linker
+Data: shape = linear
+Data: name = 14naphthalene  
+GEOMETRY CARTESIAN
+C      -1.84334331      1.02122014     -0.02413069     MMTYPE=C_R   QMMM=MM BOND=2/1.5:6/1.5:8/1.0                                 
+C      -0.47054231      1.02122014     -0.02413069     MMTYPE=C_R   QMMM=MM BOND=1/1.5:3/1.5:18/1.0                                
+C       0.25139569      2.24634114     -0.02413069     MMTYPE=C_R   QMMM=MM BOND=2/1.5:4/1.5:9/1.5                                 
+C      -0.46647431      3.47020714     -0.02376069     MMTYPE=C_R   QMMM=MM BOND=3/1.5:5/1.5:10/1.5                                
+C      -1.88789031      3.44083414     -0.02360669     MMTYPE=C_R   QMMM=MM BOND=4/1.5:6/1.5:17/1.0                                
+C      -2.55939531      2.24285914     -0.02389669     MMTYPE=C_R   QMMM=MM BOND=1/1.5:5/1.5:11/1.0                                
+H       2.22046869      1.32137614     -0.02437369     MMTYPE=H_    QMMM=MM BOND=9/1.0                                             
+H      -2.40407431      0.07487414     -0.02421069     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+C       1.67312269      2.27588414     -0.02439369     MMTYPE=C_R   QMMM=MM BOND=3/1.5:7/1.0:13/1.5                                
+C       0.25627569      4.69493314     -0.02364569     MMTYPE=C_R   QMMM=MM BOND=4/1.5:12/1.5:14/1.0                               
+H      -3.65903231      2.21649214     -0.02379469     MMTYPE=H_    QMMM=MM BOND=6/1.0                                             
+C       1.62913669      4.69500114     -0.02391869     MMTYPE=C_R   QMMM=MM BOND=10/1.5:13/1.5:15/1.0                              
+C       2.34514869      3.47310914     -0.02437769     MMTYPE=C_R   QMMM=MM BOND=9/1.5:12/1.5:16/1.0                               
+H      -0.30818031      5.63947414     -0.02338569     MMTYPE=H_    QMMM=MM BOND=10/1.0                                            
+H       2.18982869      5.64133214     -0.02409669     MMTYPE=H_    QMMM=MM BOND=12/1.0                                            
+H       3.44477669      3.49957414     -0.02455969     MMTYPE=H_    QMMM=MM BOND=13/1.0                                            
+X      -2.26591240      4.10015144     -0.02355004     MMTYPE=H_    QMMM=MM BOND=5/1.0                                             
+X      -0.08044222      0.36897640     -0.02428817     MMTYPE=H_    QMMM=MM BOND=2/1.0                                             
+END

@@ -1,0 +1,26 @@
+#!/usr/bin/python
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.align import *
+
+from ase.io import read, write
+import sys
+#import argparse
+#
+#parser = argparse.ArgumentParser(description="Read in a dftb output (.gen) and output a cif.")
+#parser.add_argument("-c", "--controlfile", nargs="?", type=str, default="control.txt", 
+#                   help="dftb output file")
+
+#args = parser.parse_args()
+#print args
+
+#print sys.argv[1]
+
+genfile=sys.argv[1]+'.gen'
+ciffile=sys.argv[1]+'.cif'
+mol=read(genfile)
+write(ciffile,mol)
+ 
+
+
+

@@ -1,0 +1,338 @@
+#!/usr/bin/python
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.io import read, write
+from ase.lattice.spacegroup import crystal
+from ase.calculators.neighborlist import *
+from ase.data import *
+from math import pi
+import numpy as np
+
+#factor = 8.675
+def make_soc(names,sizes):
+
+    #work out the expansion factor
+    factor = sum(sizes) #
+
+    a = 2.8284 * factor
+    
+    soc = crystal(['C', 'In'], [(0.25, 0, 0), (0.25, 0.25, 0.25)], spacegroup=229,  #229
+                   cellpar=[a, a, a, 90, 90, 90])
+    
+    #Use this purely to get the COM wrt In only
+    shadow_soc = crystal(['C', 'In'], [(0.25, 0, 0), (0.25, 0.25, 0.25)], spacegroup=229,
+                   cellpar=[a, a, a, 90, 90, 90])
+    del shadow_soc[[atom.index for atom in shadow_soc if atom.symbol=='C']]
+    coIn = Atom('X', position = shadow_soc.get_center_of_mass())
+    #shadow_soc +=  coIn
+    #write('In_only.xyz',shadow_soc)
+    del shadow_soc[[atom.index for atom in shadow_soc if atom.symbol=='In']]
+    #print "shadow_soc",shadow_soc
+    
+    #Now let's sort our In atoms into two sets of diagonals
+    first_In = 0
+    for atom in soc:
+        if atom.symbol !='In':
+            first_In +=1
+        else:
+            break
+    
+    #print first_In
+    intra_In_distances = {}
+    for atom in soc:
+        if atom.symbol == 'In':
+            this_dist = soc.get_distance(first_In,atom.index)
+            intra_In_distances[atom.index] = this_dist
+    #print intra_In_distances
+    sorted_IID = sorted(intra_In_distances, key=intra_In_distances.get)
+    #print sorted_IID
+    #Now assign into two sets of diagonals
+    cw_set = [first_In,sorted_IID[4],sorted_IID[5],sorted_IID[6]]
+    acw_set = [sorted_IID[1],sorted_IID[2],sorted_IID[3],sorted_IID[7]] 
+    
+    
+    #write('test.xyz',soc)
+    
+    eps = 0.01
+    model_molecule={}
+    n_obj = -1 #initialise to -1 such that it can be indexed at start of add
+    n_tags = 0
+    
+    #First detect global bonding
+    cov_rad=[]
+    for atom in soc:
+        #cov_rad.append(covalent_radii[atom.number])
+        cov_rad.append(factor / 2)
+    
+    nlist = NeighborList(cov_rad,self_interaction=False,bothways=True)
+    nlist.build(soc)
+    
+    #To sort out tags, we need to label each bond
+    nbond = 1
+    bond_matrix = np.zeros( (len(soc),len(soc)) )
+    
+    for atom in soc:
+        indices, offsets = nlist.get_neighbors(atom.index)
+        for index in indices:
+            if atom.index < index:
+                bond_matrix[atom.index,index] = nbond
+                bond_matrix[index,atom.index] = nbond
+                print atom.index, index, nbond
+                nbond +=1
+    
+    print nbond
+    print bond_matrix 
+    
+    #Now we look for all the things with 2unit bondlengths
+    #Starting with In (6 connected things)
+    for atom in soc:
+        if atom.symbol == 'In':
+            print'======================================='
+            print 'In Atom ',atom.index
+            n_obj+=1
+            model_molecule[n_obj] = Atoms()
+            model_molecule[n_obj] += atom
+            model_molecule[n_obj][0].original_index = atom.index
+            #Find the oxygens with three In bound to it
+            indices, offsets = nlist.get_neighbors(atom.index)
+            symbols = ([soc[index].symbol for index in indices])
+            symbol_string = ''.join(sorted([soc[index].symbol for index in indices]))
+            print symbol_string
+            #for i,o in zip(indices, offsets):
+            #    print i,o
+            for index,offset in zip(indices,offsets):
+                if soc[index].symbol == 'C':
+                    dist_mic = soc.get_distance(atom.index,index,mic=True)
+                    dist_no_mic = soc.get_distance(atom.index,index,mic=False)
+                    print index, dist_no_mic
+                    if (abs(dist_mic - dist_no_mic) <= eps) and (abs(dist_mic - factor) < eps): #Cell expands by the factor. Default systre bondlength is 1.0
+                         model_molecule[n_obj] += soc[index]
+                         model_molecule[n_obj][-1].tag = bond_matrix[atom.index,index]
+                    elif abs(dist_mic - factor) < eps:
+                        #If we're going over a periodic boundary, we need to negate the tag
+                        #print "Tag, ", soc[index].tag, " goes over pbc"
+                        #soc[index].tag = -(soc[index].tag)
+                        model_molecule[n_obj] += soc[index]
+                        model_molecule[n_obj][-1].tag = -bond_matrix[atom.index,index]
+                        print model_molecule[n_obj].positions[-1]
+                        model_molecule[n_obj].positions[-1] = soc.positions[index] + np.dot(offset, soc.get_cell())
+                        print model_molecule[n_obj].positions[-1]
+            model_molecule[n_obj] +=  coIn
+            #print model_molecule[n_obj].original_indices
+    n_centers = n_obj
+    
+    #Assigning In atoms to 'sets'
+    intra_In_distances = {}
+    for atom in soc:
+        if atom.symbol == 'In':
+            this_dist = soc.get_distance(first_In,atom.index)
+            intra_In_distances[atom.index] = this_dist
+    print intra_In_distances
+    sorted_IID = sorted(intra_In_distances, key=intra_In_distances.get)
+    print sorted_IID
+    #Now assign into two sets of diagonals
+    cw_set = [first_In,sorted_IID[4],sorted_IID[5],sorted_IID[6]]
+    acw_set = [sorted_IID[1],sorted_IID[2],sorted_IID[3],sorted_IID[7]] 
+    
+    angle = 30.0 * pi /180.0
+    
+    ##Now we need to rotate these carbons around
+    for obj in range(n_centers+1): 
+        #First work out the two sets of C atoms
+        print "Looking at model object, ",obj,model_molecule[obj][0].original_index
+        cx_distances = {}
+        for atom in model_molecule[obj]:
+            if atom.symbol == 'C':
+                cx_distances[atom.index] = model_molecule[obj].get_distance(atom.index,-1)
+        sorted_CXD = sorted(cx_distances, key = cx_distances.get)    
+        inner_set = [sorted_CXD[0],sorted_CXD[1],sorted_CXD[2]]
+        outer_set = [sorted_CXD[3],sorted_CXD[4],sorted_CXD[5]]
+        rotation_axis = model_molecule[obj][0].position - model_molecule[obj][-1].position #In-X
+        #Now copy each set of C and rotate, then replace the original
+        inner_mol = Atoms()
+        for a in inner_set:
+            this_atom = Atom('N',position=model_molecule[obj][a].position, tag=model_molecule[obj][a].tag)
+            inner_mol.append(this_atom)
+        outer_mol = Atoms()
+        for a in outer_set:
+            this_atom = Atom('N',position=model_molecule[obj][a].position, tag=model_molecule[obj][a].tag)
+            outer_mol.append(this_atom)
+        if model_molecule[obj][0].original_index in cw_set:
+            #inner_mol goes cw
+            inner_mol.rotate(rotation_axis,angle,center='COM')
+            outer_mol.rotate(rotation_axis,-angle,center='COM')
+        elif model_molecule[obj][0].original_index in acw_set:
+            #inner_mol goes acw
+            inner_mol.rotate(rotation_axis,-angle,center='COM')
+            outer_mol.rotate(rotation_axis,angle,center='COM')
+        model_molecule[obj] += inner_mol
+        model_molecule[obj] += outer_mol
+        soc += inner_mol
+        soc += outer_mol
+        del model_molecule[obj][[atom.index for atom in model_molecule[obj] if atom.symbol=='C' or atom.symbol == 'X']]
+        print "=============="
+    
+    #Now look for C (4 connected things)
+    for atom in soc:
+        if atom.symbol == 'C':
+            print'======================================='
+            print 'C Atom ',atom.index
+            n_obj+=1
+            model_molecule[n_obj] = Atoms()
+            model_molecule[n_obj] += atom
+            #Find the oxygens with three In bound to it
+            indices, offsets = nlist.get_neighbors(atom.index)
+            symbols = ([soc[index].symbol for index in indices])
+            symbol_string = ''.join(sorted([soc[index].symbol for index in indices]))
+            print symbol_string
+            #for i,o in zip(indices, offsets):
+            #    print i,o
+            for index,offset in zip(indices,offsets):
+                if soc[index].symbol == 'In':
+                    dist_mic = soc.get_distance(atom.index,index,mic=True)
+                    dist_no_mic = soc.get_distance(atom.index,index,mic=False)
+                    print index, dist_no_mic
+                    print soc[index].original_index
+                    if (abs(dist_mic - dist_no_mic) <= eps) and (abs(dist_mic - factor) < eps):
+                        this_tag = bond_matrix[atom.index,index]
+                        print "Searching for tag ",this_tag
+                        for atom2 in soc:
+                            if atom2.symbol == 'N' and abs(atom2.tag) == this_tag:
+                                model_molecule[n_obj] += Atom('O', position=atom2.position)
+                                model_molecule[n_obj][-1].tag = this_tag
+                        #model_molecule[n_obj] += soc[index]
+                        #model_molecule[n_obj][-1].tag = bond_matrix[atom.index,index]
+                    elif abs(dist_mic - factor) < eps:
+                        #If we're going over a periodic boundary, we need to mark the tag
+                        #print "Tag, ", soc[index].tag, " goes over pbc"
+                        this_tag = bond_matrix[atom.index,index]
+                        for atom2 in soc:
+                            if atom2.symbol == 'N' and abs(atom2.tag) == this_tag:
+                                model_molecule[n_obj] += Atom('O', position=atom2.position) 
+                                model_molecule[n_obj][-1].tag = -this_tag
+                                model_molecule[n_obj].positions[-1] = soc.positions[atom2.index] + np.dot(offset, soc.get_cell())
+    
+                        #model_molecule[n_obj] += soc[index]
+                        #model_molecule[n_obj][-1].tag = -bond_matrix[atom.index,index]
+                        #print model_molecule[n_obj].positions[-1]
+                        #model_molecule[n_obj].positions[-1] = soc.positions[index] + np.dot(offset, soc.get_cell())
+    
+    for obj in xrange(n_centers+1,n_obj+1):
+        tmp_mol = Atoms()
+        tmp_mol = model_molecule[obj].copy()
+        del tmp_mol[[atom.index for atom in tmp_mol if atom.symbol!='O']]
+        #process positions correct COM 
+        model_molecule[obj][0].position = tmp_mol.get_center_of_mass()
+    
+    #Now most of the tags have switched
+    
+    for obj in xrange(n_centers+1):
+        #process positions to make it a bit more ideal
+        for atom in model_molecule[obj]:
+            if atom.symbol == 'C' or atom.symbol == 'N':
+                model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+                shadow_soc += Atom('N', position=atom.position,tag=atom.tag)  #Keep these tags
+    
+    for obj in xrange(n_centers+1,n_obj+1):
+        #process positions to make it a bit more ideal
+        for atom in model_molecule[obj]:
+            if atom.symbol == 'O':
+                model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+                shadow_soc += Atom('O', position=atom.position)
+                #Now find the nearest N
+                rON={}
+                for atom2 in shadow_soc:
+                    if atom2.symbol == 'N':
+                        this_dist = shadow_soc.get_distance(-1,atom2.index,mic=True)
+                        rON[atom2.index] = this_dist
+                        print atom.index, atom2.index, this_dist
+                min_index = min(rON, key=rON.get)
+                atom.tag = shadow_soc[min_index].tag
+                shadow_soc[-1].tag = shadow_soc[min_index].tag
+    
+    #write('shadow_soc.xyz',shadow_soc)
+    #Tags get horribly messed up
+    t = open('tags_check','w')
+    for obj in xrange(n_obj+1):
+        #process positions to make it a bit more ideal
+        for atom in model_molecule[obj]:
+            (x,y,z) = atom.position
+            #print atom.symbol, atom.position, atom.tag
+            if atom.tag:
+                t.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % (atom.symbol, x, y, z, atom.tag))
+            else:
+                t.write('%-2s %15.8f %15.8f %15.8f\n' % (atom.symbol, x, y, z))
+    
+    
+    
+    
+    f = open('soc.model','w')
+    g = open('control-mofgen.txt','w')
+    #Just for checking, now lets gather everything in the model_molecule dict into one big thing and print it
+    #test_mol = Atoms()
+    #for obj in model_molecule:
+    #    test_mol += model_molecule[obj]
+    #
+    #write('test_model.xyz',test_mol)
+    
+    #print n_centers, n_model, n_obj
+    #Headers and cell
+    f.write('%-20s %-3d\n' %('Number of objects =',n_obj+1))
+    f.write('%-20s\n' %('build = systre'))
+    f.write('%5s\n' %('Cell:'))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (soc.get_cell()[0][0],
+               soc.get_cell()[0][1],
+               soc.get_cell()[0][2]))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (soc.get_cell()[1][0],
+               soc.get_cell()[1][1],
+               soc.get_cell()[1][2]))
+    f.write('%8.3f %8.3f %8.3f \n' %
+              (soc.get_cell()[2][0],
+               soc.get_cell()[2][1],
+               soc.get_cell()[2][2])) 
+   
+    g.write('%-20s\n' %('model = soc')) 
+    
+    for obj in xrange(n_centers+1):
+        f.write('\n%-8s %-3d\n' %('Centre: ', obj+1))
+        f.write('%-3d\n' %(len(model_molecule[obj])))
+        f.write('%-20s\n' %('type = tri_prism'))
+        #process positions to make it a bit more ideal
+        #for atom in model_molecule[obj]:
+        #    if atom.symbol == 'C' or atom.symbol == 'N':
+        #        pass#model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+        for atom in model_molecule[obj]:
+            (x,y,z) = atom.position
+            #print atom.symbol, atom.position, atom.tag
+            if atom.tag:
+                f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % ('X', x, y, z, atom.tag))
+            else:
+                f.write('%-2s %15.8f %15.8f %15.8f\n' % ('Q', x, y, z))
+        g.write('%-9s %-50s\n' %('center =', names[0]))
+    
+    for obj in xrange(n_centers+1,n_obj+1):
+        f.write('\n%-8s %-3d\n' %('Linker: ', obj-n_centers))
+        f.write('%-3d\n' %(len(model_molecule[obj])))
+        f.write('%-20s\n' %('type = rectangle'))
+        #process positions to make it a bit more ideal
+        #for atom in model_molecule[obj]:
+        #    if atom.symbol == 'In':
+        #        pass#model_molecule[obj].set_distance(atom.index,0,1.0,fix=1)
+        for atom in model_molecule[obj]:
+            (x,y,z) = atom.position
+            #print atom.symbol, atom.position, atom.tag
+            if atom.tag:
+                f.write('%-2s %15.8f %15.8f %15.8f %-4s\n' % ('X', x, y, z, atom.tag))
+            else:
+                f.write('%-2s %15.8f %15.8f %15.8f\n' % ('Q', x, y, z))
+        g.write('%-9s %-50s\n' %('linker =', names[1]))
+    
+    
+    test_mol = Atoms()
+    for obj in model_molecule:
+        test_mol += model_molecule[obj]
+    
+    write('test_model2.xyz',test_mol)
+    write('test_model2.cif',soc)

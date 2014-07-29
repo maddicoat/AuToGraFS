@@ -1,0 +1,11 @@
+Data: SBUtype = linker
+Data: shape = linear
+Data: name = biacetylene  
+GEOMETRY CARTESIAN
+C      -2.75862062     -0.76923076      0.00000000     MMTYPE=C_1   QMMM=MM BOND=2/3.0:6/1.0                                       
+C      -1.55742062     -0.76923076      0.00000000     MMTYPE=C_1   QMMM=MM BOND=1/3.0:3/1.0                                       
+C      -0.01742062     -0.76923076      0.00000000     MMTYPE=C_1   QMMM=MM BOND=2/1.0:4/3.0                                       
+C       1.18377938     -0.76923076      0.00000000     MMTYPE=C_1   QMMM=MM BOND=3/3.0:5/1.0                                       
+X       1.94377938     -0.76923076      0.00000000     MMTYPE=H_    QMMM=MM BOND=4/1.0                                             
+X      -3.51862062     -0.76923076      0.00000000     MMTYPE=H_    QMMM=MM BOND=1/1.0                                             
+END

@@ -1,0 +1,138 @@
+from ase.atom import Atom
+from ase.atoms import Atoms
+from ase.io import read, write
+import numpy as np
+
+def make_model(topology,mol_types,mol_ids):
+    """Makes an appropriately sized model file using the given topology and
+    molecules (things) supplied to it. Doesn't check if you have the right number
+    of things or that they're of the correct shape as this check is built into mofgen
+    
+    Known topologies:
+
+    ==========  ======================  =========
+    topology    center                  linker
+    ==========  ======================  =========
+    srs         triangle                linear
+    dia         tetrahedral             linear
+    sra         tetrahedral             linear
+    nbo         square                  linear
+    cds         square                  linear
+    pts         tetrahedral             rectangle 
+    ptt         tetrahedral             rectangle [rectangle] 
+    bnn         trigonal_bipyramid      linear
+    pcu         octahedral              linear
+    bor         tetrahedral             triangle
+    ctn         tetrahedral             triangle
+    pth         tetrahedral             rectangle
+    pto         square                  triangle 
+    pyr         octahedral              triangle 
+    stp         tri_prism               rectangle    
+    tbo         square                  triangle 
+    ==========  ======================  =========
+    
+"""
+
+    #Now set up some default locations for things.
+    basepath="/home/maddicoat/src/ase/ase/database/"
+    centerpath="centers/"
+    linkerpath="linkers/"
+    
+    #read "things" into a list of molecules
+    molecules = []
+    mol_sizes = []
+    for mol_type,mol_id in zip(mol_types,mol_ids):
+        filename = mol_id+'.inp'
+        try:
+            molecules.append(read(filename))
+            molecules[-1].info['name'] = mol_id
+            mol_sizes.append(furthest_dummy(molecules[-1]))
+        except IOError:
+            path=basepath+mol_type+'s/'+filename
+            molecules.append(read(path))
+            molecules[-1].info['name'] = mol_id
+            mol_sizes.append(furthest_dummy(molecules[-1]))
+   
+    #print mol_sizes
+    #now feed the molecules off to the topology
+    if topology == 'srs':
+        from ase.topology.srs import make_srs
+        return make_srs(mol_ids,mol_sizes)
+
+    if topology == 'dia':
+        from ase.topology.dia import make_dia
+        return make_dia(mol_ids,mol_sizes)
+
+    if topology == 'sra':
+        from ase.topology.sra import make_sra
+        return make_sra(mol_ids,mol_sizes)
+
+    if topology == 'nbo':
+        from ase.topology.nbo import make_nbo
+        return make_nbo(mol_ids,mol_sizes)
+    
+    if topology == 'cds':
+        from ase.topology.cds import make_cds
+        return make_cds(mol_ids,mol_sizes)
+
+    if topology == 'pts':
+        from ase.topology.pts import make_pts
+        return make_pts(mol_ids,mol_sizes)
+
+    if topology == 'ptt':
+        from ase.topology.ptt import make_ptt
+        return make_ptt(mol_ids,mol_sizes)
+
+    if topology == 'bnn':
+        from ase.topology.bnn import make_bnn
+        return make_bnn(mol_ids,mol_sizes)
+
+    if topology == 'pcu':
+        from ase.topology.pcu import make_pcu
+        return make_pcu(mol_ids,mol_sizes)
+
+    if topology == 'bor':
+        from ase.topology.bor import make_bor
+        return make_bor(mol_ids,mol_sizes)
+
+    if topology == 'ctn':
+        from ase.topology.ctn import make_ctn
+        return make_ctn(mol_ids,mol_sizes)
+
+    if topology == 'pth':
+        from ase.topology.pth import make_pth
+        return make_pth(mol_ids,mol_sizes)
+
+    if topology == 'pto':
+        from ase.topology.pto import make_pto
+        return make_pto(mol_ids,mol_sizes)
+    
+    if topology == 'pyr':
+        from ase.topology.pyr import make_pyr
+        return make_pyr(mol_ids,mol_sizes)
+
+    if topology == 'stp':
+        from ase.topology.stp import make_stp
+        return make_stp(mol_ids,mol_sizes)
+
+    if topology == 'tbo':
+        from ase.topology.tbo import make_tbo
+        return make_tbo(mol_ids,mol_sizes)
+
+
+
+    raise RuntimeError('Topology: '+topology+' not implemented!')
+
+
+
+def furthest_dummy(mol):
+    """Takes a mol and returns the distance of the dummy
+    furthest away from the COM"""
+
+    com=mol.get_center_of_mass()
+    dist_array=np.zeros(len(mol))
+    for a in range(0,len(mol)):
+        if mol[a].symbol  == 'X' :
+            D=mol.positions[a]-com
+            dist_array[a]=np.linalg.norm(D)
+    return np.amax(dist_array)
