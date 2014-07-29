@@ -1339,8 +1339,6 @@ def transfer_dummy_tags_dist(mol,model):    #This assigns the closest model dumm
     mol_dummies = mol.get_atom_indices('X')
     model_dummies = model.get_atom_indices('X')
     com=mol.get_center_of_mass()
-    write('tdtd-mol.xyz',mol)
-    write('tdtd-model.xyz',model)
     #Now we set up a dictionary to match dummy to dummy
     mol_to_model={}
     for a in mol_dummies:
@@ -1675,8 +1673,8 @@ def assemble_systre(model,fragments):
         print "Begin systre-style assemble:",fragments[frag].get_tags()
         mof += fragments[frag]
 
-        outfile='assemble'+`frag`+'.xyz'
-        write(outfile,mof)
+        #outfile='assemble'+`frag`+'.xyz'
+        #write(outfile,mof)
     return mof
 
 def bond_frame(mof, periodic=True):
