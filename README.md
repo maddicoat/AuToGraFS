@@ -8,7 +8,9 @@ Manual coming soon...
 Here's how to install AuToGraFS on a clean Ubuntu (tested with 14.04.1) install:
 
 sudo apt-get install python-dev
+
 sudo apt-get install python-pip
+
 sudo pip install numpy
 
 then unpack the attached tarball in your home directory:
