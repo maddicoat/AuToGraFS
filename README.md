@@ -5,10 +5,25 @@ Automatic Topological Generator for Framework Structures
 
 Manual coming soon...
 
-AuToGraFS as downloaded is a drop-in replacement for the python ASE and you can install it in your user directory by following the "Manual Installation" instructions located at:
+Here's how to install AuToGraFS on a clean Ubuntu (tested with 14.04.1) install:
 
-https://wiki.fysik.dtu.dk/ase/download.html#manual-installation
+sudo apt-get install python-dev
+sudo apt-get install python-pip
+sudo pip install numpy
 
-Python requirements are the same as for the ASE, plus the argparse module. 
+then unpack the attached tarball in your home directory:
 
-Some topologies do not work with the latest version of numpy. This is being fixed.
+tar -zxf autografs_0.1.1.tar.gz
+
+add the following two lines to your .bashrc
+
+export PYTHONPATH=$HOME/autografs/:$PYTHONPATH
+export PATH=$HOME/bin/:$HOME/autografs/ase/tools:$PATH
+
+in the autografs directory that was just created in your homedir, you should see a subdir called autografs_examples
+
+To run one of the examples, copy it to a new directory and (for sra example):
+
+~/autografs/mofgen.py -c control_sra.txt -o sra -e cif >sra.out
+
+
