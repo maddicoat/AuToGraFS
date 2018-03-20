@@ -5,7 +5,11 @@ Automatic Topological Generator for Framework Structures
 
 Manual coming soon...
 
-Here's how to install AuToGraFS on a clean Ubuntu (tested with 14.04.1) install:
+AuToGraFs is now accessible via pip!
+
+https://pypi.python.org/pypi/AuToGraFS/2.0.4b0
+
+If you'd stil like to install manually: Here's how to install AuToGraFS on a clean Ubuntu (tested with 16.04) install:
 ```
 sudo apt-get install python-dev
 sudo apt-get install python-pip
